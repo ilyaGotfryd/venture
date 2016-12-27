@@ -5,6 +5,18 @@
 # is restricted to this project.
 use Mix.Config
 
+config :venture, Venture.Robot,
+  adapter: Hedwig.Adapters.Slack,
+  name: "venturebot",
+  token: "",
+  aka: "/",
+  responders: [
+    {Hedwig.Responders.Help, []},
+    {Venture.SlideResponder, []},
+    {Hedwig.Responders.Ping, []}
+  ]
+
+
 # Configures the endpoint
 config :venture, Venture.Endpoint,
   url: [host: "localhost"],

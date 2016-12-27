@@ -15,6 +15,7 @@ defmodule Venture do
         id: :presentation_monitor),
       worker(Venture.ChannelMonitor, [:chat],
         id: :chat_monitor),
+      worker(Venture.Robot, []),
       worker(Venture.Deck, []),
       worker(Venture.Presentation, [ets]),
       worker(Venture.Selections, []),

@@ -17,7 +17,7 @@ defmodule Venture.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [mod: {Venture, []},
-     applications: [:phoenix, :phoenix_pubsub, :cowboy, :logger, :yaml_elixir]]
+     applications: [:phoenix, :phoenix_pubsub, :cowboy, :logger, :yaml_elixir, :hedwig_slack]]
   end
 
   # Specifies which paths to compile per environment
@@ -33,6 +33,8 @@ defmodule Venture.Mixfile do
       {:phoenix_pubsub, "~> 1.0"},
       {:cowboy, "~> 1.0"},
       {:uuid, "~> 1.0.1"},
+      {:poison, "~> 3.0", override: true},
+      {:hedwig_slack, "~> 1.0"},
       {:yaml_elixir, "~> 1.2.1"}
     ]
   end
