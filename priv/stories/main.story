@@ -276,8 +276,8 @@ end
 ---
 
 ---
-## Introducing Venture
-* You're watching it now!
+## Introducing [Venture](https://github.com/superchris/venture)
+* Thanks Ernie Miller!
 * React front end
 * Phoenix back end
 * Slides are markdown (with YAML)
