@@ -18,7 +18,7 @@ export default class SlideViewer extends React.Component {
 
   render() {
     let { isPresenter, slide, channel } = this.props;
-    let className = isPresenter ? styles.presenter : styles.attendee;
+    let className = styles.attendee;//isPresenter ? styles.presenter : styles.attendee;
     return (
       <div className={styles.viewer}>
         <PresenterOverlay

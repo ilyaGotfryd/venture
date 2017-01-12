@@ -25,6 +25,7 @@ COPY . /app
 # Set /app as workdir
 WORKDIR /app
 
+RUN mix clean
 RUN mix deps.get
 RUN mix compile
 

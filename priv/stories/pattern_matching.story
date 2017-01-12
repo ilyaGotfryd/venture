@@ -1,39 +1,53 @@
 ---
 
 ---
-## Pattern matching
+## Pattern Matching
+\\\\\\\\\\\
+---
+
+---
+#### Here is code you would never write
 ```elixir
-  def complex_function(thing) do
-    case thing do
-      {one, two} ->
-        IO.puts("its a two element tuple with #{one} and #{two}")
-      [one, two, three] ->
-        IO.puts("its a list with #{one} and #{two} and #{three}")
-      _ ->
-        IO.puts("I don't care what it is.")
+defmodule StupidFizzbuzz do
+  def fizzbuzz(n) do
+    cond do
+      n == 3 ->
+        :fizz
+      n == 5 ->
+        :buzz
+      true ->
+        n
     end
   end
+end
 ```
 \\\\\\\\\\\
-## Pattern matching in function dispatch
-```elixir
-  def two_headed_function(map = %{a: a}) do
-    IO.puts("I got a map with an a: #{a}")
-    IO.inspect(map)
-  end
-
-  def two_headed_function({one, two}) do
-    IO.puts("I got a two tuple with: #{one} and #{two}")
-  end
+## Pattern matching to the rescue
+```
+defmodule StupidFizzbuzz do
+  def fizzbuzz(3), do: :fizz
+  def fizzbuzz(5), do: :buzz
+  def fizzbuzz(n), do: n
+end
 ```
 \\\\\\\\\\\
 ---
 next: main:8
 ---
-## The pipeline operator
+## With destructuring...
 ```elixir
-  def pipeline_example do
-    "string" |> String.capitalize |> String.split("")
+defmodule AnimalSounds do
+  def make_sound({:cat, name}) do
+    IO.puts "#{name} the cat goes Meow."
   end
+
+  def make_sound({:dog, name}) do
+    IO.puts "#{name} the dog goes Woof."
+  end
+
+  def make_sound({animal, _}) do
+    IO.puts "I don't know what sound a #{animal} makes."
+  end
+end
 ```
 \\\\\\\\\\\

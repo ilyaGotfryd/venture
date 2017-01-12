@@ -8,7 +8,7 @@ use Mix.Config
 config :venture, Venture.Robot,
   adapter: Hedwig.Adapters.Slack,
   name: "venturebot",
-  token: "",
+  token: "xoxb-120977952404-bJysvwhUu5KGwYPKLdrb0ELB",
   aka: "/",
   responders: [
     {Hedwig.Responders.Help, []},

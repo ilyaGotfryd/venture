@@ -2,16 +2,28 @@
 type: title
 ---
 
-#### Process Oriented Programming in Elixir
+### Process Oriented Programming in Elixir
+#### Chris Nelson
+![](images/gaslight_horz.png)
 \\\\\\\\\\\
 
 ## Agenda
 
 * Introducing Elixir
-* Processes and OTP
 * What even is OOP?
-* POD (Process Oriented Design)
+* Processes
 * An Elixir AdVenture
+* POD (Process Oriented Design)
+\\\\\\\\\\\
+---
+class: dark
+align: left top
+background:
+  image: inception.jpg
+  size: cover
+---
+## This is a meta-talk
+### http://codemash.dev.builders
 \\\\\\\\\\\
 ---
 type: poll
@@ -30,8 +42,8 @@ Have you Elixired?
 * Created by Jose Valim in 2012
 * Functional
 * Immutable
+* Erlang VM (BEAM)
 * Approachable syntax
-* Runs on Erlang VM (BEAM)
 \\\\\\\\\\\
 ---
 
@@ -57,6 +69,7 @@ true               # boolean
 [1, 2, 3]          # list
 {1, 2, 3}          # tuple
 %{a: "b", c: "d"}  # map
+%{"&*!" => "foo"}  # map
 ```
 \\\\\\\\\\\
 ---
@@ -84,6 +97,57 @@ paths:
 ---
 
 ---
+## The `|` operator
+```elixir
+1 | [2, 3]
+# [1, 2, 3]
+[h | t] = [1, 2, 3]
+# h = 1
+# t = [2, 3]
+```
+\\\\\\\\\\\
+---
+
+---
+## The `|` operator with maps
+```
+map = %{a: 1, b: 2}
+updated = %{ map | b: 3 }
+# map = %{a: 1, b: 3}
+```
+### Only updates, cannot add new keys
+\\\\\\\\\\\
+## A brief history of OOP
+* Simula2
+* Alan Kay
+* Smalltalk
+* 1970s
+\\\\\\\\\\\
+---
+
+---
+"I thought of objects being like biological cells and/or individual
+computers on a network, only able to communicate with messages..."
+
+"OOP to me means only messaging, local retention and protection and
+hiding of state-process..."
+
+### --Alan Kay
+\\\\\\\\\\\
+
+## Key features of OOP
+* State encapsulation
+* Message passing
+
+\\\\\\\\\\\
+## What isn't in here?
+* Classes
+* Interfaces
+* Inheritance
+\\\\\\\\\\\
+---
+
+---
 ## Processes
 * Incredibly light (1k)
 * No shared anything
@@ -95,16 +159,8 @@ paths:
 * receive
 \\\\\\\\\\\
 ## Mailboxes etc
-![20x15](images/process_mailboxes.png)
+![15x11](images/process_mailboxes.png)
 \\\\\\\\\\\
----
-
----
-## Pong demo
-\\\\\\\\\\\
----
-
----
 ## OTP
 * Open Telecom Platform
 * Developed over 20 years of Telco systems in Erlang
@@ -130,7 +186,7 @@ Allows a module to implement a stateful server process
 ---
 
 ---
-## Yes. But it will be ok. I promise
+## Get a state. Return a state.
 \\\\\\\\\\\
 ---
 
@@ -172,6 +228,12 @@ GenServer.call(pid, :pop)
 ---
 
 ---
+## Let's play with it.
+until it breaks...
+\\\\\\\\\\\
+---
+
+---
 ## Let it crash
 \\\\\\\\\\\
 ---
@@ -185,70 +247,28 @@ GenServer.call(pid, :pop)
 ---
 
 ---
-## This is a meta presentation
-\\\\\\\\\\\
-
-## A brief history of OOP
-* Alan Kay
-* Smalltalk
-* 1970s
+## OTP Applications
+* A set of processes that do something
+* Easy to share
+* Distributed components
 \\\\\\\\\\\
 ---
 
 ---
-"I thought of objects being like biological cells and/or individual
-computers on a network, only able to communicate with messages (so
-messaging came at the very beginning -- it took a while to see how to
-do messaging in a programming language efficiently enough to be
-useful)"
-
-
-
-"OOP to me means only messaging, local retention and protection and
-hiding of state-process, and extreme late-binding of all things."
-
-### --Alan Kay
-\\\\\\\\\\\
-
-## Key features of OOP
-* Message passing
-* State encapsulation
-* Late binding
-
-\\\\\\\\\\\
-
-## What isn't in here?
-* Classes
-* Interfaces
-* Inheritance
-\\\\\\\\\\\
----
-
----
-### How OO is OO?
-Let's pick on a typical OO web MVC framework
-\\\\\\\\\\\
----
-align: left
----
-## A presentation app
-#### As the presenter, I want to advance my slides so I can do my presentation
-#### As an attendee, I want to see the current slide so I can keep up
-\\\\\\\\\\\
----
-
----
+## Supervised Stack
 ```
-class SlidesController < ApplicationController
-  def current_slide
-    @slide = Slide.where(current: true)
-  end
+defmodule SupervisedStack do
+  use Application
 
-  def advance_slide
-    @current_slide = Slide.where(current: true)
-    @next_slide = Slide.find(params[:id])
-    @current_slide.update_attributes!(current: false)
-    @next_slide.update_attributes!(current: true)
+  def start(_type, _args) do
+    import Supervisor.Spec, warn: false
+
+    children = [
+      worker(Stack, [])
+    ]
+
+    opts = [strategy: :one_for_one, name: :stack_supervisor]
+    Supervisor.start_link(children, opts)
   end
 end
 ```
@@ -256,15 +276,10 @@ end
 ---
 
 ---
-## Where's the state?
-\\\\\\\\\\\
----
-
----
 ## Introducing Venture
-* Your watching it now!
+* You're watching it now!
 * React front end
-* Elixir/Phoenix back end
+* Phoenix back end
 * Slides are markdown (with YAML)
 * Supports polls, forks, chat
 \\\\\\\\\\\
@@ -297,7 +312,91 @@ end
 ---
 
 ---
+## PresentationChannel
+```
+  def join("presentation:attendee", _, socket ) do
+    slide = Venture.Presentation.current_slide
+    selections = Venture.Selections.current
+    {
+      :ok,
+      %{slide: slide, selections: selections},
+      socket
+    }
+  end
+```
+\\\\\\\\\\\
+---
+
+---
+## Presentation GenServer
+```elixir
+  def handle_call({:current_slide}, _from, state) do
+    {:reply, Deck.slide_at(state.current), state}
+  end
+```
+\\\\\\\\\\\
+---
+
+---
+## Deck GenServer
+location: `%{story: "main", index: 2}`
+```elixir
+  def handle_call({:slide_at, location}, _from, state) do
+    slide = Dict.get(state.stories, location.story, [])
+            |> Enum.at(location.index)
+    { :reply, slide, state }
+  end
+```
+\\\\\\\\\\\
+---
+
+---
 ## What happens when the presenter advances the slide?
+\\\\\\\\\\\
+---
+
+---
+## PresentationChannel
+```
+  def handle_in("next", _, socket) do
+    case Venture.Presentation.next do
+      nil -> nil
+      slide -> broadcast_slide! slide
+    end
+    {:noreply, socket}
+  end
+```
+\\\\\\\\\\\
+---
+
+---
+## PresentationServer
+```
+  def handle_call({:next}, _from, state) do
+    current_slide = Deck.slide_at(state.current)
+    case current_slide.next do
+      nil -> {:reply, nil, state}
+      next_slide ->
+        reset_selections_for_slide(next_slide)
+        {
+          :reply,
+          Deck.slide_at(next_slide.location),
+          next_slide_state(current_slide, next_slide, state)
+        }
+    end
+  end
+```
+\\\\\\\\\\\
+---
+
+---
+```
+  defp next_slide_state(current, next, state) do
+    %{ state |
+       current: next.location,
+       history: [current.location | state.history] }
+  end
+```
 \\\\\\\\\\\
 ---
 
@@ -319,15 +418,16 @@ end
 ---
 ## What makes a good process
 * Has a Single Responsibility
-* Has state
-* There should only be n of them
-* Does something async
+* Has State
+* Managing finite resources
+* Concurrency
 \\\\\\\\\\\
 ---
 
 ---
 ## When not to use processes
-* to avoid passing context
+* when a POEM will do
+* to avoid passing extra parameters
 * to simulate [OO](https://github.com/wojtekmach/oop)
 \\\\\\\\\\\
 ---
@@ -340,5 +440,5 @@ end
 ---
 
 ---
-## Venturebot
+## Questions?
 \\\\\\\\\\\
